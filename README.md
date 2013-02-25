@@ -1,8 +1,10 @@
-# Urban Dictionary Search
+# Priberam Dictionary Search
 
-Simple Google Chrome extension that grabs definitions from [Urban Dictionary](http://www.urbandictionary.com/). It is available in the [Chrome Web Store](https://chrome.google.com/webstore/detail/gfjijibnpohkjdmbahejpeoilmgjahei).
+Simple Google Chrome extension that grabs definitions from [Priberam](http://http://priberam.pt/dlpo/).
+Priberam does not provided any API so anything can break from time to time.
 
-Since Urban Dictionary (currently) doesn't have an official API, the definitions are web scraped. For that reason the extension might break at any time (I doubt it will be anytime soon, though, since UD seems to be rarely updated). I probably won't update this extension anymore so if it breaks feel free to fork away and fix it.
+This extension was entirely based on https://github.com/tiagomnh/urbandictionary-search
+
 
 # License
 
