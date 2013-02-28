@@ -5,7 +5,7 @@ function handleFormSubmit(query) {
 		display("message", {
 			type: "information",
 			label: "Information",
-			content: "Use the search box to search for words or phrases.",
+			content: "Use esta caixa de texto para procurar palavras.",
 		});
 	}
 }
@@ -14,59 +14,68 @@ function search(query) {
 	$("#search-icon").addClass("loading");
 	$("#search-input").val(query);
 
-	var searchUrl = 'http://www.urbandictionary.com/define.php';
+	var searchUrl = 'http://priberam.pt/dlpo/default.aspx';
 
 	$.ajax({
 		url: searchUrl,
 		type: "GET",
 		data: {
-			'term': query
+			'pal': query
 		},
 		success: function(data) {
-			parseResponse(data);
+			parseResponse(query, data);
 		},
 		error: function() {
 			display("message", {
 				type: "error",
 				label: "Error",
-				content: "There was an error.",
+				content: "Ocorreu um erro, por favor tente mais tarde.",
 			});
 		}
 	});
 }
 
-function parseResponse(response) {
+function parseResponse(query, response) {
 	var $response = $(response);
-
-	var numberOfResults = $response.find(".index").length;
-	if (numberOfResults == 0) {
-		display("message", {
-			type: "warning",
-			label: "No results",
-			content: "Try searching for something else.",
-		});
-		return;
-	}
-
+	var first = true;
 	var results = [];
-	for (var index = 0; index < numberOfResults; index++) {
+	var word_of_the_day = [];
+	var records = $response.find('div[registo="true"]');
 
-		var tags = [];
-		// TODO: implement tag scraping
+	if(records.length > 1) {
+	    for(var i = 0; i < records.length; i++) {
 
-		var result = {
-			"href": $.trim($response.find("td.index a").eq(index).attr("href")),
-			"expression": $.trim($response.find("td.word").eq(index).html()),
-			"definition": handleLinks($response.find(".definition").eq(index).html()),
-			"example": handleLinks($response.find(".example").eq(index).html()),
-			"tags": tags
-		}
+	    	var $record = $(records[i]);
 
-		results.push(result);
+	    	var spans = $record.find('span[ondblclick]');
+
+	    	for(var j = 0; j < spans.length; j++) {
+	    		var result = {
+	    			"definition": spans[j].textContent
+	    		};
+	    		if(i == 0) {
+	    			word_of_the_day.push(result);
+	    			display("word_of_the_day", word_of_the_day, query);
+	    		}
+	    		else {
+	    			results.push(result);
+	    			display("result", results, query);
+	    		}
+	    	}
+	    }
 	}
-
-	// currently only the first one is displayed
-	display("result", results[0]);
+	else{
+		var records = $response.find('div#FormataSugestoesENaoEncontrados a');
+		if(records.length > 0) {
+			for(var i = 0; i < records.length; i++) {
+				var result = {
+					"definition": records[i].textContent
+				}
+				results.push(result);
+			}
+			display("suggestions", results, query);
+		}
+	}
 }
 
 function insertInfoRow(type, label, content) {
@@ -76,32 +85,50 @@ function insertInfoRow(type, label, content) {
 	$("#result-info").append($row);
 }
 
-function display(type, content) {
+function insertLinkRow(type, label, content) {
+	var $row = $("<tr>").addClass(type);
+	$row.append($("<td>").addClass("label").html(label));
+	$row.append($("<td>").addClass("content").html($("<a>").addClass("link-content").html(content)));
+	$("#result-info").append($row);
+}
+
+function display(type, content, query) {
 	$("#search-icon").removeClass("loading");
 	$("#result-info").hide();
 	$("#result-info").empty();
 
 	if (type == "result") {
-		displayResult(content);
+		displayResult(content, "Defini&ccedil;&atilde;o",query);
 	}
 	else if (type == "message") {
 		displayMessage(content);
+	}
+	else if(type == "suggestions") {
+		displayResult(content, "Quis dizer", query);
+	}
+	else if(type == "word_of_the_day") {
+		displayResult(content, "Palavra do dia", query);	
 	}
 
 	$("#result-info").fadeIn(250);
 	$("#result").show();
 }
 
-function displayResult(fields) {
-	var $expression = $("<a>").attr("href", fields["href"]).html(fields["expression"]);
-	var $expressionCell = $("<td>").attr("colspan", 2).html($expression);
+function displayResult(fields, label, query) {
+
+	var $expressionCell = $("<td>").attr("colspan", 2).html(query);
 	var $expressionRow = $("<tr>").addClass("expression").html($expressionCell);
 	$("#result-info").append($expressionRow);
 
-	insertInfoRow("definition", "Definition", fields["definition"]);
-
-	if (fields["example"].length > 0) {
-		insertInfoRow("example", "Example", fields["example"]);
+	var first = true;
+	for(var i = 0; i < fields.length; i++) {
+		if(first) {
+			first = false;
+			insertInfoRow("definition", label, fields[i]["definition"]);
+		}
+		else {
+			insertInfoRow("definition", "", fields[i]["definition"]);
+		}
 	}
 }
 
@@ -133,4 +160,9 @@ $(window).load(function() {
 			handleFormSubmit($("#search-input").val());
         }
     });
+
+    $("#search-input").click(function() {
+    	console.log("olaaa");
+		
+	});
 });

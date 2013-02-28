@@ -1,13 +1,13 @@
 {
     "manifest_version": 2,
-    "name": "Urban Dictionary Search",
+    "name": "Priberam Search",
     "version": "1.3.1",
-    "description": "Searches expressions on UrbanDictionary.com.",
+    "description": "Searches dictionary entries in priberam.",
     "icons": {
-        "128": "images/icons/icon128.png"
+        "128": "images/icons/simbolo.jpg"
     },
     "browser_action": {
-        "default_icon": "images/icons/icon128.png",
+        "default_icon": "images/icons/simbolo.jpg",
         "default_popup": "html/popup.html"
     },
     "permissions": [
