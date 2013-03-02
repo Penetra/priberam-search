@@ -10,35 +10,55 @@ function handleFormSubmit(query) {
     }
 }
 
+function cleanArray(array) {
+    return $.grep(array,function(n){
+            return(n);
+        }
+    );
+}
+
 function search(query) {
     $("#search-icon").addClass("loading");
     $("#search-input").val(query);
 
     var searchUrl = 'http://priberam.pt/dlpo/default.aspx';
 
-    $.ajax({
-        url: searchUrl,
-        type: "GET",
-        data: {
-            'pal': query
-        },
-        success: function(data) {
-            //Empty current window
-            $("#result-info").empty();
+    $("#search-icon").removeClass("loading");
+    $("#result").hide();
+    $("#result-info").hide();
+    //Empty current window
+    $("#result-info").empty();
 
-            parseResponse(query, data);
-        },
-        error: function() {
-            display("message", {
-                type: "error",
-                label: "Error",
-                content: "Ocorreu um erro, por favor tente mais tarde.",
-            });
-        }
-    });
+    //allow searching for several words
+    var words = cleanArray(query.split(' '));
+
+    var j = 0;
+    for(var i = 0; i < words.length; i++) {
+        $.ajax({
+            url: searchUrl,
+            type: "GET",
+            data: {
+                'pal': words[i]
+            },
+            success: function(data) {
+                parseResponse(words[j], data, (j++ + 1 == words.length));
+            },
+            error: function() {
+                display("message", {
+                    type: "error",
+                    label: "Error",
+                    content: "Ocorreu um erro, por favor tente mais tarde.",
+                });
+            }
+        });
+    }
+
+    //Show
+    $("#result-info").fadeIn(250);
+    $("#result").show();
 }
 
-function parseResponse(query, response) {
+function parseResponse(query, response, multiple) {
     var $response = $(response);
     var first = true;
     var results = [];
@@ -78,7 +98,9 @@ function parseResponse(query, response) {
         }
         //Display results
         display("result", results, query);
-        display("word_of_the_day", word_of_the_day, word);
+        if(multiple) {
+            display("word_of_the_day", word_of_the_day, word);
+        }
     }
     else{
         //Incorrect word, show suggestions
@@ -131,12 +153,9 @@ function insertLinkRow(type, label, content) {
 }
 
 function display(type, content, query) {
-    $("#search-icon").removeClass("loading");
-    $("#result-info").hide();
 
-    
     if (type == "result") {
-        displayResult(content, "Defini&ccedil;&atilde;o",query);
+        displayResult(content, "Defini&ccedil;&atilde;o", query);
     }
     else if(type == "suggestions") {
         displayResult(content, "Quis dizer", query);
@@ -147,9 +166,6 @@ function display(type, content, query) {
     else if (type == "message") {
         displayMessage(content);
     }
-
-    $("#result-info").fadeIn(250);
-    $("#result").show();
 }
 
 function displayResult(fields, label, query) {
