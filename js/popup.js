@@ -45,14 +45,11 @@ function parseResponse(query, response) {
 
     if(records.length > 1) {
         for(var i = 0; i < records.length; i++) {
-
             var $record = $(records[i]);
-
             //word of the day
             if(i == 0) {
                 word = $record.find('span b')[0].textContent;
             }
-
             var spans = $record.find('span[ondblclick]');
 
             for(var j = 0; j < spans.length; j++) {
@@ -155,7 +152,8 @@ function handleLinks(html) {
     return tempDiv.html();
 }
 
-$(window).load(function() {
+//$(window).load(function() {
+function main() {
     $("#search-input").focus();
 
     chrome.extension.onRequest.addListener(function(selection) {
@@ -171,9 +169,14 @@ $(window).load(function() {
             handleFormSubmit($("#search-input").val());
         }
     });
+}
 
-    $("#search-input").click(function() {
-        console.log("olaaa");
-        
-    });
-});
+/*function clickHandler(element) {
+    console.log("oliololio");
+}
+//});
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelector('td').addEventListener('click', clickHandler);
+  main();
+});*/
