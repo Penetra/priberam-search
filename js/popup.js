@@ -25,7 +25,7 @@ function search(query) {
         success: function(data) {
             //Empty current window
             $("#result-info").empty();
-            
+
             parseResponse(query, data);
         },
         error: function() {
@@ -43,19 +43,24 @@ function parseResponse(query, response) {
     var first = true;
     var results = [];
     var word_of_the_day = [];
-    var records = $response.find('div[registo="true"]');
     var word = '';
 
+    //Search for response and word of the day
+    var records = $response.find('div[registo="true"]');
+
+    //Found match
     if(records.length > 1) {
         for(var i = 0; i < records.length; i++) {
             var $record = $(records[i]);
-            //word of the day
+            
+            //word of the day is supposed to appear first
             if(i == 0) {
                 word = $record.find('span b')[0].textContent;
             }
-            //Get meanings
+            //Get word meanings
             var spans = $record.find('span[ondblclick]');
 
+            //Remove garbage and traductions
             for(var j = 0; j < spans.length; j++) {
                 $content = $(spans[j]);
                 if($content.find('small').length == 0 && $content.attr('class') !== "dAO") {
@@ -87,6 +92,14 @@ function parseResponse(query, response) {
             }
             display("suggestions", results, query);
         }
+        else {
+            //Should not appear because priberam always returns something
+            display("message", {
+                type: "error",
+                label: "Error",
+                content: "Nenhuma palavra encontrada, por favor verifique a palavra introduzida.",
+            });
+        }
     }
 }
 
@@ -97,6 +110,7 @@ function insertInfoRow(type, label, content) {
     $("#result-info").append($row);
 }
 
+//Clickable link
 function insertLinkRow(type, label, content) {
     var $row = $("<tr>").addClass(type);
     $row.append($("<td>").addClass("label").html(label));
@@ -120,17 +134,18 @@ function display(type, content, query) {
     $("#search-icon").removeClass("loading");
     $("#result-info").hide();
 
+    
     if (type == "result") {
         displayResult(content, "Defini&ccedil;&atilde;o",query);
-    }
-    else if (type == "message") {
-        displayMessage(content);
     }
     else if(type == "suggestions") {
         displayResult(content, "Quis dizer", query);
     }
     else if(type == "word_of_the_day") {
         displayResult(content, "Palavra do dia", query);    
+    }
+    else if (type == "message") {
+        displayMessage(content);
     }
 
     $("#result-info").fadeIn(250);
@@ -179,7 +194,7 @@ $(window).load(function() {
 
 $(document).ready(function () {
     $('a.link-content').live('mousedown', function(){
-        var query = $(this).html().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        var query = $(this).html().replace(/[\.,\/#!$%\^&\*;:{}=_`~()]/g,"");
         handleFormSubmit(query);
     });
 })
