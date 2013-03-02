@@ -23,9 +23,7 @@ function search(query) {
 
     var searchUrl = 'http://priberam.pt/dlpo/default.aspx';
 
-    $("#search-icon").removeClass("loading");
     $("#result").hide();
-    $("#result-info").hide();
     //Empty current window
     $("#result-info").empty();
 
@@ -42,6 +40,11 @@ function search(query) {
             },
             success: function(data) {
                 parseResponse(words[j], data, (j++ + 1 == words.length));
+                if(j == words.length) {
+                    $("#search-icon").removeClass("loading");
+                    $("#result-info").fadeIn(250);
+                    $("#result").show();
+                }
             },
             error: function() {
                 display("message", {
@@ -54,8 +57,8 @@ function search(query) {
     }
 
     //Show
-    $("#result-info").fadeIn(250);
-    $("#result").show();
+    
+    //
 }
 
 function parseResponse(query, response, multiple) {

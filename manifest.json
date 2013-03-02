@@ -4,10 +4,10 @@
     "version": "1.3.1",
     "description": "Searches dictionary entries in priberam.",
     "icons": {
-        "128": "images/icons/simbolo.jpg"
+        "128": "images/icons/transparent_icon.png"
     },
     "browser_action": {
-        "default_icon": "images/icons/simbolo.jpg",
+        "default_icon": "images/icons/transparent_icon.png",
         "default_popup": "html/popup.html"
     },
     "permissions": [
