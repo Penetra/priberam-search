@@ -23,6 +23,9 @@ function search(query) {
             'pal': query
         },
         success: function(data) {
+            //Empty current window
+            $("#result-info").empty();
+            
             parseResponse(query, data);
         },
         error: function() {
@@ -50,12 +53,11 @@ function parseResponse(query, response) {
             if(i == 0) {
                 word = $record.find('span b')[0].textContent;
             }
+            //Get meanings
             var spans = $record.find('span[ondblclick]');
 
             for(var j = 0; j < spans.length; j++) {
-
                 $content = $(spans[j]);
-
                 if($content.find('small').length == 0 && $content.attr('class') !== "dAO") {
                     var result = {
                         "definition": spans[j].textContent
@@ -69,10 +71,12 @@ function parseResponse(query, response) {
                 }
             }
         }
+        //Display results
         display("result", results, query);
         display("word_of_the_day", word_of_the_day, word);
     }
     else{
+        //Incorrect word, show suggestions
         var records = $response.find('div#FormataSugestoesENaoEncontrados a');
         if(records.length > 0) {
             for(var i = 0; i < records.length; i++) {
@@ -96,7 +100,19 @@ function insertInfoRow(type, label, content) {
 function insertLinkRow(type, label, content) {
     var $row = $("<tr>").addClass(type);
     $row.append($("<td>").addClass("label").html(label));
-    $row.append($("<td>").addClass("content").html($("<a>").addClass("link-content").html(content)));
+
+    var words = content.split(' ');
+    var links = '';
+    for(var i = 0; i < words.length; i++) {
+        links += '<a class="link-content">'
+        links += words[i];
+        if(i != (words.length - 1)) {
+            links+= ' ';
+        }
+        links += '</a>'
+    }
+
+    $row.append($("<td>").addClass("content").html(links));
     $("#result-info").append($row);
 }
 
@@ -105,7 +121,6 @@ function display(type, content, query) {
     $("#result-info").hide();
 
     if (type == "result") {
-        $("#result-info").empty();
         displayResult(content, "Defini&ccedil;&atilde;o",query);
     }
     else if (type == "message") {
@@ -132,10 +147,10 @@ function displayResult(fields, label, query) {
     for(var i = 0; i < fields.length; i++) {
         if(first) {
             first = false;
-            insertInfoRow("definition", label, fields[i]["definition"]);
+            insertLinkRow("definition", label, fields[i]["definition"]);
         }
         else {
-            insertInfoRow("definition", "", fields[i]["definition"]);
+            insertLinkRow("definition", "", fields[i]["definition"]);
         }
     }
 }
@@ -144,16 +159,7 @@ function displayMessage(message) {
     insertInfoRow(message["type"], message["label"], message["content"]);
 }
 
-function handleLinks(html) {
-    // right now the anchors are being removed
-    // later on I want to convert them to search links
-    var tempDiv = $("<div>").html(html);
-    tempDiv.find("a").contents().unwrap();
-    return tempDiv.html();
-}
-
-//$(window).load(function() {
-function main() {
+$(window).load(function() {
     $("#search-input").focus();
 
     chrome.extension.onRequest.addListener(function(selection) {
@@ -169,14 +175,11 @@ function main() {
             handleFormSubmit($("#search-input").val());
         }
     });
-}
+});
 
-/*function clickHandler(element) {
-    console.log("oliololio");
-}
-//});
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector('td').addEventListener('click', clickHandler);
-  main();
-});*/
+$(document).ready(function () {
+    $('a.link-content').live('mousedown', function(){
+        var query = $(this).html().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        handleFormSubmit(query);
+    });
+})
