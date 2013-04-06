@@ -39,7 +39,9 @@ function search(query) {
                 'pal': words[i]
             },
             success: function(data) {
-                parseResponse(words[j], data, (j++ + 1 == words.length));
+                var doc = document.implementation.createHTMLDocument('');
+                doc.documentElement.innerHTML = data;
+                parseResponse(words[j], doc, (j++ + 1 == words.length));
                 if(j == words.length) {
                     $("#search-icon").removeClass("loading");
                     $("#result-info").fadeIn(250);
@@ -86,7 +88,20 @@ function parseResponse(query, response, multiple) {
             //Remove garbage and traductions
             for(var j = 0; j < spans.length; j++) {
                 $content = $(spans[j]);
-                if($content.find('small').length == 0 && $content.attr('class') !== "dAO") {
+
+                var firstWord = ""
+
+                //If special word
+                var special = $content.find('span[class="varpt"]');
+                if(special.length > 0) {
+                    var $temp = $(special);
+                    var f = $temp.find('span[class="aAO"]');
+                    if(f.length > 0) {
+                        firstWord = f[0].textContent; 
+                    }
+                }
+
+                if($content.find('small').length == 0 && $content.attr('class') !== "dAO" && $content.attr('class') !== "dAO" ) {
                     var result = {
                         "definition": spans[j].textContent
                     };
