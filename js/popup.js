@@ -101,7 +101,7 @@ function parseResponse(query, response, multiple) {
                     }
                 }
 
-                if($content.find('small').length == 0 && $content.attr('class') !== "dAO" && $content.attr('class') !== "dAO" ) {
+                if($content.find('small').length == 0 && $content.attr('class') !== "dAO") {
                     var result = {
                         "definition": spans[j].textContent
                     };
